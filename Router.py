@@ -56,7 +56,7 @@ class Router(pb2_grpc.RouterServiceServicer):
         local_valid_pair = False
         local_session_id = None
 
-
+        print("Pairing request, token: ",request.PairID," Identity: ",str(request.Identity))
         if(request.Identity):
             self.PairingFrontend.append(request.PairID)
         else:
