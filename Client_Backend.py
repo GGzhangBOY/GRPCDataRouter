@@ -1,8 +1,6 @@
 import ProtoGen.AudioCommucation_pb2 as pb2
 import ProtoGen.AudioCommucation_pb2_grpc as pb2_grpc
-
-import ProtoGen.AudioCommucation_pb2 as pb2
-import ProtoGen.AudioCommucation_pb2_grpc as pb2_grpc
+import StreamingAudio
 import grpc
 import time
 
@@ -32,9 +30,10 @@ def run():
 
     while True:
         for Data in Data_Ite:
-            print(Data)
+            cache_raw_data_int_list.append(Data.AudioRawData)
             stub.P_SendResult(pb2.RecognitionResult(No=0,AdditionalInfo=PairInfoRef.SessionID,Result="Test"))
  
  
 if __name__ == '__main__':
+    StreamingAudio.Run(2)
     run()

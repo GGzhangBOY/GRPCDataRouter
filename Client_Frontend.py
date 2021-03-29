@@ -1,12 +1,19 @@
 import ProtoGen.AudioCommucation_pb2 as pb2
 import ProtoGen.AudioCommucation_pb2_grpc as pb2_grpc
+import numpy as np
 import grpc
 import time
+import StreamingAudio
 
 __TIME_OUT_SEC = 120
+__GLOBAL_COUNTER = 0
 def AudioDataGetter(In_AdditionalInfoInfo):
     while True:
-        yield pb2.AudioData(No=0,AdditionalInfo=In_AdditionalInfoInfo,AudioRawData=[1,2,3,4,5])
+        if(len(StreamingAudio.cache_raw_data_int_list)==0):
+            continue
+        data = StreamingAudio.cache_raw_data_int_list.popleft()
+        __GLOBAL_COUNTER += 1
+        yield pb2.AudioData(No=__GLOBAL_COUNTER,AdditionalInfo=In_AdditionalInfoInfo,AudioRawData=data)
 
 def run():
     # Connect to grpc server
@@ -32,6 +39,7 @@ def run():
         return
     
     print("Set Sender!")
+
     RecResults = stub.SendData(AudioDataGetter(PairInfoRef.SessionID))
     print(RecResults)
     time.sleep(1)
@@ -43,5 +51,6 @@ def run():
  
  
 if __name__ == '__main__':
+    StreamingAudio.Run(1)
     run()
 
