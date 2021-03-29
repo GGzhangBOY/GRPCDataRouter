@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+service RouterService {
+    // Pair current sender with service-provider or service-request
+    rpc GetPair(PairInfo) returns (SessionID) {}
+    // Choose the model to be used
+    rpc SetModel(StartModelRequest) returns (StatusResponse) {}
+
+    rpc P_GetModel(EmptyRequest) returns (StartModelRequest) {}
+
+    rpc P_SetModeSuccess(StatusResponse) returns (EmptyRequest) {}
+    // client2server stream rpc
+    rpc SendData(stream AudioData) returns (stream RecognitionResult) {}
+
+    rpc P_GetData(GetDataRequest) returns (stream AudioData) {}
+
+    rpc P_SendResult(RecognitionResult) returns (StatusResponse) {}
+    // stream rpc
+    rpc Close(CloseRequest) returns (StatusResponse) {}
+
+    rpc P_GetClose(EmptyRequest) returns (CloseRequest) {}
+
+    rpc P_SendCloseResult(CloseRequest) returns (EmptyRequest) {}
+}
+
+//Pair client server provider info
+message PairInfo{
+    bool Identity = 1;
+    string PairID = 2;
+}
+
+//Pair Session ID
+message SessionID{
+    bool VaildPair = 3;
+    string SessionID = 4;
+}
+
+//Choose which model to launch
+message StartModelRequest {
+    int32 ModelNum = 5;
+    string AdditionalInfo = 6;
+}
+
+
+//
+//Project specific proto config(wenet speech rec)
+//
+
+//The Audio Data To Pass
+message AudioData {
+    int32 No = 9;
+    string AdditionalInfo = 10;
+    repeated int32 AudioRawData = 11;
+}
+
+//The Response of the model
+message RecognitionResult {
+    int32 No = 12;
+    string AdditionalInfo = 13;
+    string Result = 14;
+}
+
+message CloseRequest{
+    bool ShouldClose = 15;
+    string CloseInfo = 16;
+}
+
+message GetDataRequest{
+    string AdditionalInfo = 17;
+}
+
+message StatusResponse{
+    bool IsSuccess = 18;
+    string AdditionalInfo = 19;
+}
+
+message EmptyRequest{
+    string AdditionalInfo = 20;
+}
