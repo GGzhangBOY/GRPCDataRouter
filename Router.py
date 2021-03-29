@@ -78,6 +78,7 @@ class Router(pb2_grpc.RouterServiceServicer):
                 break
             time.sleep(1)
         
+        print("Make new session: ",local_session_id)
         return pb2.SessionID(VaildPair = local_valid_pair, SessionID = local_session_id)
 
     # Choose the model to be used
@@ -92,6 +93,7 @@ class Router(pb2_grpc.RouterServiceServicer):
                     pass
                 
                 if(current_status == -1):
+                    print("Set model :",request.ModelNum," for session id: ",request.AdditionalInfo)
                     return pb2.StatusResponse(IsSuccess = True, AdditionalInfo="Success, Code -1")
                 
                 if(current_status == -2):
@@ -129,11 +131,13 @@ class Router(pb2_grpc.RouterServiceServicer):
     # client2server stream rpc
     def SendData(self, request_iterator, context): #returns (stream RecognitionResult) {}
         for request in request_iterator:
+            print("Receive client data")
             self.PairedDataDict[request.AdditionalInfo]["Frontend_dataslot"].append(request)
             for f_data in self.__PopIte(self.PairedDataDict[request.AdditionalInfo]["Backend_dataslot"]):
                 yield pb2.RecognitionResult(Result=f_data.Result, No=f_data.No, AdditionalInfo=f_data.AdditionalInfo)
 
     def P_SendResult(self, request, context):# returns (stream StatusResponse) 
+        print("Receive server response")
         self.PairedDataDict[request.AdditionalInfo]["Backend_dataslot"].append(request)
         return pb2.StatusResponse(IsSuccess = True, AdditionalInfo="Router Response")
 
@@ -167,6 +171,7 @@ def serve():
     pb2_grpc.add_RouterServiceServicer_to_server(Router(), server)
     server.add_insecure_port('[::]:50051')
     server.start()
+    print("Server Started!")
     try:
         while True:
             pass # one day in seconds
@@ -175,3 +180,4 @@ def serve():
 
 if __name__=="__main__":
     serve()
+    
